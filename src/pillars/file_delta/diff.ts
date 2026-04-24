@@ -25,5 +25,10 @@ export function unifiedDiff(a: string, b: string): string {
 
 export function diffSizeRatio(diff: string, originalLen: number): number {
   if (originalLen === 0) return 1;
-  return diff.length / originalLen;
+  // Count only changed bytes (+/- lines), excluding context lines (leading space).
+  let changed = 0;
+  for (const line of diff.split("\n")) {
+    if (line.startsWith("+") || line.startsWith("-")) changed += line.length;
+  }
+  return changed / originalLen;
 }

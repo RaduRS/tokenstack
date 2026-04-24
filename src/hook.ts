@@ -33,6 +33,12 @@ register("UserPromptSubmit", handleUserPromptSubmit);
 import { handlePostToolUseBash } from "./pillars/bash_filter/hook.js";
 register("PostToolUse", handlePostToolUseBash);
 
+import { handlePreToolUseRead } from "./pillars/file_delta/hook.js";
+register("PreToolUse", async (e) => {
+  if (e.tool_name === "Read") return handlePreToolUseRead(e);
+  return {};
+});
+
 export async function dispatch(event: HookEvent): Promise<HookResponse> {
   const h = handlers[event.hook_event_name];
   if (!h) return {};

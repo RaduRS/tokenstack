@@ -40,3 +40,14 @@ export function getCached(db: Db, abspath: string): Cached | null {
   const content = brotliDecompressSync(row.brotli_content).toString("utf8");
   return { content, hash: row.content_hash, served_at: row.served_at };
 }
+
+// Like getCached but ignores mtime/size drift — used by the delta hook which
+// explicitly wants the previously-served content even if the file has since changed.
+export function getCachedStale(db: Db, abspath: string): Cached | null {
+  const row = db.prepare(
+    "SELECT content_hash, brotli_content, served_at FROM read_cache WHERE abspath = ?"
+  ).get(abspath) as { content_hash: string; brotli_content: Buffer; served_at: number } | undefined;
+  if (!row) return null;
+  const content = brotliDecompressSync(row.brotli_content).toString("utf8");
+  return { content, hash: row.content_hash, served_at: row.served_at };
+}
