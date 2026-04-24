@@ -1,9 +1,18 @@
 {
   "name": "tokenstack",
   "version": "0.1.0",
-  "description": "Five-front token optimization for Claude Code",
-  "author": "tokenstack contributors",
+  "description": "Five-front token optimization for Claude Code: output verbosity, Bash bloat, file re-read waste, compaction survival, and code navigation.",
+  "author": {
+    "name": "RaduRS",
+    "url": "https://github.com/RaduRS"
+  },
+  "homepage": "https://github.com/RaduRS/tokenstack",
+  "repository": "https://github.com/RaduRS/tokenstack",
   "license": "MIT",
-  "commands": ["commands/ts.md"],
-  "skills": ["skills/tokenstack"]
+  "keywords": [
+    "tokens",
+    "optimization",
+    "hooks",
+    "productivity"
+  ]
 }
