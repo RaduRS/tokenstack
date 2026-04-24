@@ -1,0 +1,9 @@
+{
+  "name": "tokenstack",
+  "version": "0.1.0",
+  "description": "Five-front token optimization for Claude Code",
+  "author": "tokenstack contributors",
+  "license": "MIT",
+  "commands": ["commands/ts.md"],
+  "skills": ["skills/tokenstack"]
+}
