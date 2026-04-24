@@ -1,0 +1,57 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative, extname } from "node:path";
+import { createHash } from "node:crypto";
+import type { Db } from "../../storage/db.js";
+import { extractJsTs } from "./extract/js_ts.js";
+import { chunkSymbol } from "./chunk.js";
+
+const EXT_TO_LANG: Record<string, string> = {
+  ".js": "jsts", ".jsx": "jsts", ".ts": "jsts", ".tsx": "jsts", ".mjs": "jsts", ".cjs": "jsts",
+};
+
+const IGNORE = new Set(["node_modules", "dist", ".git", ".tokenstack", "coverage", "build", ".next", ".cache"]);
+
+const sha = (s: string) => createHash("sha256").update(s).digest("hex");
+
+function* walk(root: string, dir: string = root): Generator<string> {
+  let entries;
+  try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+  for (const ent of entries) {
+    if (IGNORE.has(ent.name)) continue;
+    const p = join(dir, ent.name);
+    if (ent.isDirectory()) yield* walk(root, p);
+    else if (ent.isFile() && EXT_TO_LANG[extname(ent.name)]) yield p;
+  }
+}
+
+export async function indexProject(db: Db, root: string): Promise<number> {
+  let n = 0;
+  const insert = db.prepare(
+    `INSERT INTO symbols(id, path, start_line, end_line, kind, name, name_lc, content, content_lc, content_hash)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(path, start_line, end_line) DO UPDATE SET
+       kind=excluded.kind, name=excluded.name, name_lc=excluded.name_lc,
+       content=excluded.content, content_lc=excluded.content_lc, content_hash=excluded.content_hash`
+  );
+  db.prepare("BEGIN").run();
+  try {
+    db.prepare("DELETE FROM symbols").run();
+    for (const abspath of walk(root)) {
+      let src: string;
+      try { src = readFileSync(abspath, "utf8"); } catch { continue; }
+      if (src.length > 1024 * 1024) continue;
+      const rel = relative(root, abspath);
+      for (const sym of extractJsTs(rel, src)) {
+        for (const c of chunkSymbol(sym)) {
+          insert.run(c.id, c.path, c.start_line, c.end_line, c.kind, c.name, c.name.toLowerCase(), c.content, c.content.toLowerCase(), sha(c.content));
+          n++;
+        }
+      }
+    }
+    db.prepare("COMMIT").run();
+  } catch (e) {
+    db.prepare("ROLLBACK").run();
+    throw e;
+  }
+  return n;
+}
