@@ -41,3 +41,13 @@ test("ts recover <id>", async () => {
     assert.ok(out.includes("RAW_HELLO"));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test("ts coach prints trend", async () => {
+  const base = mkdtempSync(join(tmpdir(), "ts-home-"));
+  try {
+    const { writeSession } = await import("../pillars/telemetry/trends.js");
+    writeSession(base, { project: "p", ts_start: 1, ts_end: 2, score: 82, signals: {} });
+    const out = await runCli(["coach", "--home", base]);
+    assert.match(out, /82/);
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});

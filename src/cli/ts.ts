@@ -72,6 +72,14 @@ export async function runCli(argv: string[]): Promise<string> {
         return `indexed ${n} symbols`;
       } finally { db.close(); }
     }
+    case "coach": {
+      const { recentSessions } = await import("../pillars/telemetry/trends.js");
+      const rows = recentSessions(home, 10);
+      if (rows.length === 0) return "(no sessions recorded yet)";
+      const avg = rows.reduce((a, b) => a + b.score, 0) / rows.length;
+      const lines = rows.map((r) => `${new Date(r.ts_end).toISOString().slice(0, 16)}  ${r.score.toFixed(1)}`);
+      return `Last ${rows.length} sessions (avg ${avg.toFixed(1)}):\n${lines.join("\n")}`;
+    }
     default:
       return `Usage: /ts <subcommand> [args]
   mode <off|lite|full|ultra>   set output-rule mode
