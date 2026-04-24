@@ -1,4 +1,8 @@
 import { loadConfig, saveConfig, type Mode } from "../storage/config.js";
+import { openDb } from "../storage/db.js";
+import { searchSymbols } from "../pillars/code_nav/search.js";
+import { disclose } from "../pillars/code_nav/disclosure.js";
+import { indexProject } from "../pillars/code_nav/indexer.js";
 
 const MODES: Mode[] = ["off", "lite", "full", "ultra"];
 
@@ -37,6 +41,36 @@ export async function runCli(argv: string[]): Promise<string> {
       const raw = recover(cwd ?? process.cwd(), id);
       if (!raw) throw new Error(`no tee entry for id ${id}`);
       return raw;
+    }
+    case "search": {
+      const q = positional.join(" ");
+      if (!q) throw new Error("usage: /ts search <query>");
+      const db = openDb(cwd ?? process.cwd());
+      try {
+        const hits = searchSymbols(db, q, 10);
+        if (hits.length === 0) return "(no results)";
+        return hits.map((h) => disclose(h, 0)).join("\n");
+      } finally { db.close(); }
+    }
+    case "show": {
+      const id = positional[0];
+      const levelArg = rest.find((a) => a.startsWith("--level="));
+      const level = Number(levelArg?.slice(8) ?? 3) as 0 | 1 | 2 | 3;
+      if (!id) throw new Error("usage: /ts show <id> [--level=0..3]");
+      const db = openDb(cwd ?? process.cwd());
+      try {
+        const row = db.prepare("SELECT id, path, start_line, end_line, kind, name, content FROM symbols WHERE id = ?").get(id) as any;
+        if (!row) throw new Error(`no symbol: ${id}`);
+        return disclose({ ...row, score: 1 }, level);
+      } finally { db.close(); }
+    }
+    case "index": {
+      const root = cwd ?? process.cwd();
+      const db = openDb(root);
+      try {
+        const n = await indexProject(db, root);
+        return `indexed ${n} symbols`;
+      } finally { db.close(); }
     }
     default:
       return `Usage: /ts <subcommand> [args]
