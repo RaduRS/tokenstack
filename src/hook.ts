@@ -24,6 +24,9 @@ export function register(event: string, handler: Handler): void {
   handlers[event] = handler;
 }
 
+import { handleSessionStart } from "./pillars/output_rules/session_start.js";
+register("SessionStart", handleSessionStart);
+
 export async function dispatch(event: HookEvent): Promise<HookResponse> {
   const h = handlers[event.hook_event_name];
   if (!h) return {};
