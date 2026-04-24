@@ -37,11 +37,14 @@ function mergeResponses(a: HookResponse, b: HookResponse): HookResponse {
 
 import { handleSessionStart } from "./pillars/output_rules/session_start.js";
 import { handlePostToolUseEvent, handlePreCompact, handleSessionStartToc } from "./pillars/compact_toc/hook.js";
+import { handleSessionEnd, handleSessionStartShowLast } from "./pillars/telemetry/hook.js";
 register("SessionStart", async (e) => {
   const a = await handleSessionStart(e);
   const b = await handleSessionStartToc(e);
-  return mergeResponses(a, b);
+  const c = await handleSessionStartShowLast(e);
+  return mergeResponses(mergeResponses(a, b), c);
 });
+register("SessionEnd", handleSessionEnd);
 
 import { handleUserPromptSubmit } from "./pillars/output_rules/prompt_submit.js";
 register("UserPromptSubmit", handleUserPromptSubmit);
