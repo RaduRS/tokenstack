@@ -102,7 +102,7 @@ Data flow:
 ### Pillar 5 — Code navigation (token-savior + claude-context)
 
 - `/ts index` triggers project indexing
-- AST chunking: regex-per-language (cheap, zero-dep) for JS/TS/JSX/TSX/Py/Go/Rust/Java/Ruby; TS compiler API only if user opts in
+- AST chunking: regex-per-language (cheap, zero-dep) for JS/TS/JSX/TSX/Py/Go/Rust/Java/Ruby. Precise AST via `typescript` or `tree-sitter` is explicitly deferred to v2 to keep zero-runtime-dep promise
 - Symbols extracted: functions, classes, methods, exports, imports
 - Chunk cap: 2500 chars + 300 overlap (matches claude-context)
 - Deterministic chunk ID: `sha256(relPath + startLine + endLine + content).slice(0,16)`
