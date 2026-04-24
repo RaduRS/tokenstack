@@ -19,7 +19,6 @@ function parseOpts(args: string[]): Opts {
 export async function runCli(argv: string[]): Promise<string> {
   const [cmd, ...rest] = argv;
   const { positional, cwd, home } = parseOpts(rest);
-  void cwd;
   switch (cmd) {
     case "mode": {
       const m = positional[0];
@@ -30,6 +29,14 @@ export async function runCli(argv: string[]): Promise<string> {
     case "status": {
       const cfg = loadConfig(home);
       return `mode=${cfg.mode} filters=${cfg.filters_enabled} delta=${cfg.delta_enabled}`;
+    }
+    case "recover": {
+      const id = Number(positional[0]);
+      if (!id) throw new Error("usage: /ts recover <id>");
+      const { recover } = await import("../pillars/bash_filter/hook.js");
+      const raw = recover(cwd ?? process.cwd(), id);
+      if (!raw) throw new Error(`no tee entry for id ${id}`);
+      return raw;
     }
     default:
       return `Usage: /ts <subcommand> [args]
