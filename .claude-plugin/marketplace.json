@@ -11,7 +11,10 @@
       "name": "tokenstack",
       "description": "Attacks token waste on five fronts at once: output verbosity, Bash output bloat, file re-read waste, compaction survival, and code navigation.",
       "category": "productivity",
-      "source": ".",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/RaduRS/tokenstack.git"
+      },
       "homepage": "https://github.com/RaduRS/tokenstack",
       "license": "MIT"
     }
