@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "tokenstack",
+  "description": "Five-front token optimization for Claude Code",
+  "owner": {
+    "name": "RaduRS",
+    "url": "https://github.com/RaduRS"
+  },
+  "plugins": [
+    {
+      "name": "tokenstack",
+      "description": "Attacks token waste on five fronts at once: output verbosity, Bash output bloat, file re-read waste, compaction survival, and code navigation.",
+      "category": "productivity",
+      "source": ".",
+      "homepage": "https://github.com/RaduRS/tokenstack",
+      "license": "MIT"
+    }
+  ]
+}
