@@ -29,3 +29,17 @@ test("tsc keeps error lines", () => {
   assert.ok(out.includes("TS2304"));
   assert.ok(!out.includes("watch noise"));
 });
+
+test("jest keeps only failures + summary", () => {
+  const raw = "PASS src/a.test.ts\nconsole.log noise\n✕ t1\nTests: 1 failed, 5 passed\nDuration 1.2s";
+  const out = runFilter(find("jest-vitest"), raw);
+  assert.ok(out.includes("✕"));
+  assert.ok(out.includes("Tests:"));
+  assert.ok(!out.includes("console.log"));
+});
+
+test("ls caps length", () => {
+  const raw = Array.from({ length: 200 }, (_, i) => `f${i}.ts`).join("\n");
+  const out = runFilter(find("ls"), raw);
+  assert.ok(out.split("\n").length <= 61);
+});
