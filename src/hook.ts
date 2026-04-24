@@ -30,6 +30,9 @@ register("SessionStart", handleSessionStart);
 import { handleUserPromptSubmit } from "./pillars/output_rules/prompt_submit.js";
 register("UserPromptSubmit", handleUserPromptSubmit);
 
+import { handlePostToolUseBash } from "./pillars/bash_filter/hook.js";
+register("PostToolUse", handlePostToolUseBash);
+
 export async function dispatch(event: HookEvent): Promise<HookResponse> {
   const h = handlers[event.hook_event_name];
   if (!h) return {};
