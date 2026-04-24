@@ -92,10 +92,15 @@ export async function runCli(argv: string[]): Promise<string> {
       } finally { db.close(); }
     }
     default:
-      return `Usage: /ts <subcommand> [args]
-  mode <off|lite|full|ultra>   set output-rule mode
-  status                       show current config
-  (more subcommands ship in later phases)`;
+      return `Usage: /tokenstack:ts <subcommand> [args]
+  mode <off|lite|full|ultra>    set output-rule mode
+  status                        show current mode + flags
+  index                         index this project for symbol search
+  search <query>                find symbols (returns L0 hits with id=)
+  show <id> [--level=0..3]      escalate: 0=path:lines, 1=signature, 2=skeleton, 3=body
+  recover <id>                  pull raw Bash output when a filter was too aggressive
+  coach                         show recent session-score trend
+  reset [--cache|--index|--all] nuke local state`;
   }
 }
 
