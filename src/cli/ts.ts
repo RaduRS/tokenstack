@@ -80,6 +80,17 @@ export async function runCli(argv: string[]): Promise<string> {
       const lines = rows.map((r) => `${new Date(r.ts_end).toISOString().slice(0, 16)}  ${r.score.toFixed(1)}`);
       return `Last ${rows.length} sessions (avg ${avg.toFixed(1)}):\n${lines.join("\n")}`;
     }
+    case "reset": {
+      const root = cwd ?? process.cwd();
+      const flags = new Set(rest.filter((a) => a.startsWith("--")));
+      if (flags.size === 0) throw new Error("usage: /ts reset [--cache|--index|--all]");
+      const db = openDb(root);
+      try {
+        if (flags.has("--cache") || flags.has("--all")) db.prepare("DELETE FROM read_cache").run();
+        if (flags.has("--index") || flags.has("--all")) db.prepare("DELETE FROM symbols").run();
+        return "reset complete";
+      } finally { db.close(); }
+    }
     default:
       return `Usage: /ts <subcommand> [args]
   mode <off|lite|full|ultra>   set output-rule mode

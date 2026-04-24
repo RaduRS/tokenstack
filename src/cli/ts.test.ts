@@ -51,3 +51,18 @@ test("ts coach prints trend", async () => {
     assert.match(out, /82/);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
+
+test("reset --cache clears read_cache", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "ts-proj-"));
+  try {
+    const db = openDb(dir);
+    db.prepare("INSERT INTO read_cache(abspath, mtime_ns, size, content_hash, brotli_content, served_at) VALUES (?,?,?,?,?,?)")
+      .run("/x", 1, 1, "h", Buffer.from([1]), Date.now());
+    db.close();
+    await runCli(["reset", "--cache", "--cwd", dir]);
+    const db2 = openDb(dir);
+    const n = (db2.prepare("SELECT COUNT(*) AS c FROM read_cache").get() as { c: number }).c;
+    db2.close();
+    assert.equal(n, 0);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
