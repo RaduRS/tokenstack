@@ -1,6 +1,6 @@
 {
   "name": "tokenstack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Five-front token optimization for Claude Code: output verbosity, Bash bloat, file re-read waste, compaction survival, and code navigation.",
   "author": {
     "name": "RaduRS",
