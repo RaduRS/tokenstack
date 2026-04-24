@@ -8,8 +8,8 @@ Claude Code plugin. Attacks token waste on five fronts at once — output verbos
 
 On any machine with Claude Code + Node 22.5+:
 
-    /plugin marketplace add <YOUR-GITHUB-USER>/tokenstack
-    /plugin install tokenstack
+    /plugin marketplace add RaduRS/tokenstack
+    /plugin install tokenstack@tokenstack
 
 Zero npm dependencies at runtime. All state is local.
 
