@@ -3,11 +3,25 @@ import { join, relative, extname } from "node:path";
 import { createHash } from "node:crypto";
 import type { Db } from "../../storage/db.js";
 import { extractJsTs } from "./extract/js_ts.js";
+import { extractPython, extractGo, extractRust, extractJava, extractRuby } from "./extract/generic.js";
 import { chunkSymbol } from "./chunk.js";
 
 const EXT_TO_LANG: Record<string, string> = {
   ".js": "jsts", ".jsx": "jsts", ".ts": "jsts", ".tsx": "jsts", ".mjs": "jsts", ".cjs": "jsts",
+  ".py": "py", ".go": "go", ".rs": "rs", ".java": "java", ".rb": "rb",
 };
+
+function extractForLang(lang: string, path: string, src: string) {
+  switch (lang) {
+    case "jsts": return extractJsTs(path, src);
+    case "py": return extractPython(path, src);
+    case "go": return extractGo(path, src);
+    case "rs": return extractRust(path, src);
+    case "java": return extractJava(path, src);
+    case "rb": return extractRuby(path, src);
+    default: return [];
+  }
+}
 
 const IGNORE = new Set(["node_modules", "dist", ".git", ".tokenstack", "coverage", "build", ".next", ".cache"]);
 
@@ -41,7 +55,9 @@ export async function indexProject(db: Db, root: string): Promise<number> {
       try { src = readFileSync(abspath, "utf8"); } catch { continue; }
       if (src.length > 1024 * 1024) continue;
       const rel = relative(root, abspath);
-      for (const sym of extractJsTs(rel, src)) {
+      const lang = EXT_TO_LANG[extname(abspath)];
+      if (!lang) continue;
+      for (const sym of extractForLang(lang, rel, src)) {
         for (const c of chunkSymbol(sym)) {
           insert.run(c.id, c.path, c.start_line, c.end_line, c.kind, c.name, c.name.toLowerCase(), c.content, c.content.toLowerCase(), sha(c.content));
           n++;
